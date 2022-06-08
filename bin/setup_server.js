@@ -4,7 +4,7 @@ const path = require("path")
 const inquirer = require("inquirer")
 const exec = util.promisify(require("child_process").exec)
 
-const logMessage = msg => console.log("\x1b[32m", msg, "\x1b[0m")
+const logMessage = msg => console.log() && console.log("\x1b[32m", msg, "\x1b[0m")
 const ownPath = process.cwd()
 
 const questions = [
@@ -50,49 +50,31 @@ const questions = [
             return '';
         },
         when(answers) {
-            return answer.appName === 'tmbapi'
+            return answers.appName === 'tmbapi'
         }
     },
-    {
-        type: "confirm",
-        name: "db_support",
-        message: "Enable Database Support",
-        default() {
-            return false
-        }
-    },
-    {
-        type: "list",
-        name: "db_support_options",
-        message: "Database support for?",
-        choices: ["mongodb", "mysql", "sqlite"],
-        filter(val) {
-            return val.toLowerCase()
-        },
-        when(answers) {
-            return answers.db_support
-        }
-    }
+    
 ]
 
 inquirer.prompt(questions).then(async (answers) => {
 
-    switch(answer.appName) {
+    switch(answers.appName) {
         case "tmbweb":
-            answer.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/trademybots.git"
-            answer.port = 8080
+            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/trademybots.git"
+            answers.port = 8080
 
             break;
         case "tmbapi":
-            answer.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/trademybots.git"
-            answer.port = 5555
+            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/trademybots.git"
+            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/api.trademybots.com.git"
+            answers.port = 5555
 
             break;
     }
 
-    answer.branchName = 'develop';
-    if (answer.nodeEnv === 'production') {
-        answer.branchName = 'master';
+    answers.branchName = 'develop';
+    if (answers.nodeEnv === 'production') {
+        answers.branchName = 'develop';
     }
 
     // answers.appPath = path.join(ownPath, answers.appName)
@@ -167,10 +149,10 @@ async function setup(answers) {
         await runCmd(`sudo mkdir /opt/bitnami/projects`)
         await runCmd(`sudo chown $USER /opt/bitnami/projects`)
         process.chdir(`/opt/bitnami/projects/`)
-        await runCmd(`git clone --depth=1 ${answer.repo} ${answer.appName}`)
+        await runCmd(`git clone ${answers.repo} ${answers.appName}`)
 
         logMessage("Installing dependencies")
-        process.chdir(`/opt/bitnami/projects/${answer.appName}`)
+        process.chdir(`/opt/bitnami/projects/${answers.appName}`)
         // TODO: should be main branch
         await runCmd(`git checkout develop`)
         await runCmd("npm install --silent")
@@ -178,32 +160,31 @@ async function setup(answers) {
         logMessage("Updating environment variables")
         await fs.copyFileSync("./.env.example", ".env")
 
-        if (answer.appName === 'tmbweb') {
-            await runCmd(`sed 's/BASE_URL=.*/BASE_URL=${answer.baseUrl}/' .env`)
-            await runCmd(`sed 's/MONGODB_URI=.*/MONGODB_URI=${answer.mongodbUri}/' .env`)
-            await runCmd(`sed 's/SITE_CONTACT_EMAIL=.*/SITE_CONTACT_EMAIL=${answer.siteContactEmail}/' .env`)
-            await runCmd(`sed 's/SESSION_SECRET=.*/SESSION_SECRET=${answer.sessionSecret}/' .env`)
-            await runCmd(`sed 's/GOOGLE_ID=.*/GOOGLE_ID=${answer.googleId}/' .env`)
-            await runCmd(`sed 's/GOOGLE_SECRET=.*/GOOGLE_SECRET=${answer.googleSecret}/' .env`)
+        if (answers.appName === 'tmbweb') {
+            await runCmd(`sed 's/BASE_URL=.*/BASE_URL=${answers.baseUrl}/' .env`)
+            await runCmd(`sed 's/MONGODB_URI=.*/MONGODB_URI=${answers.mongodbUri}/' .env`)
+            await runCmd(`sed 's/SITE_CONTACT_EMAIL=.*/SITE_CONTACT_EMAIL=${answers.siteContactEmail}/' .env`)
+            await runCmd(`sed 's/SESSION_SECRET=.*/SESSION_SECRET=${answers.sessionSecret}/' .env`)
+            await runCmd(`sed 's/GOOGLE_ID=.*/GOOGLE_ID=${answers.googleId}/' .env`)
+            await runCmd(`sed 's/GOOGLE_SECRET=.*/GOOGLE_SECRET=${answers.googleSecret}/' .env`)
 
-            await runCmd(`sed 's/SMTP_USER=.*/SMTP_USER=${answer.smtpUser}/' .env`)
-            await runCmd(`sed 's/SMTP_PASSWORD=.*/SMTP_PASSWORD=${answer.smtpPassword}/' .env`)
-            await runCmd(`sed 's/SMTP_HOST=.*/SMTP_HOST=${answer.smtpHost}/' .env`)
-            await runCmd(`sed 's/SMTP_PORT=.*/SMTP_PORT=${answer.smtpPort}/' .env`)
-            await runCmd(`sed 's/EMAIL_FROM=.*/EMAIL_FROM=${answer.emailFrom}/' .env`)
+            await runCmd(`sed 's/SMTP_USER=.*/SMTP_USER=${answers.smtpUser}/' .env`)
+            await runCmd(`sed 's/SMTP_PASSWORD=.*/SMTP_PASSWORD=${answers.smtpPassword}/' .env`)
+            await runCmd(`sed 's/SMTP_HOST=.*/SMTP_HOST=${answers.smtpHost}/' .env`)
+            await runCmd(`sed 's/SMTP_PORT=.*/SMTP_PORT=${answers.smtpPort}/' .env`)
+            await runCmd(`sed 's/EMAIL_FROM=.*/EMAIL_FROM=${answers.emailFrom}/' .env`)
 
-            await runCmd(`sed 's/RAZORPAY_API_KEY=.*/RAZORPAY_API_KEY=${answer.razorpayApiKey}/' .env`)
-            await runCmd(`sed 's/RAZORPAY_API_SECRET=.*/RAZORPAY_API_SECRET=${answer.razorpayApiSecret}/' .env`)
-            await runCmd(`sed 's/RAZORPAY_DEFAULT_PLAN=.*/RAZORPAY_DEFAULT_PLAN=${answer.razorpayApiSecret}/' .env`)
+            await runCmd(`sed 's/RAZORPAY_API_KEY=.*/RAZORPAY_API_KEY=${answers.razorpayApiKey}/' .env`)
+            await runCmd(`sed 's/RAZORPAY_API_SECRET=.*/RAZORPAY_API_SECRET=${answers.razorpayApiSecret}/' .env`)
+            await runCmd(`sed 's/RAZORPAY_DEFAULT_PLAN=.*/RAZORPAY_DEFAULT_PLAN=${answers.razorpayApiSecret}/' .env`)
 
-        } else if (answer.appName === 'tmbweb') {
-            await runCmd(`sed 's/NODE_ENV=.*/NODE_ENV=${answer.nodeEnv}/' .env`)
-            await runCmd(`sed 's/MONGO_URI=.*/MONGO_URI=${answer.mongodbUri}/' .env`)
-            await runCmd(`sed 's/HOST=.*/HOST=${answer.host}/' .env`)
-            await runCmd(`sed 's/PORT=.*/PORT=${answer.port}/' .env`)
-            await runCmd(`sed 's/RAZORPAY_WEBHOOK_SECRET=.*/RAZORPAY_WEBHOOK_SECRET=${answer.razorpayWebhookSecret}/' .env`)
+        } else if (answers.appName === 'tmbweb') {
+            await runCmd(`sed 's/NODE_ENV=.*/NODE_ENV=${answers.nodeEnv}/' .env`)
+            await runCmd(`sed 's/MONGO_URI=.*/MONGO_URI=${answers.mongodbUri}/' .env`)
+            await runCmd(`sed 's/HOST=.*/HOST=${answers.host}/' .env`)
+            await runCmd(`sed 's/PORT=.*/PORT=${answers.port}/' .env`)
+            await runCmd(`sed 's/RAZORPAY_WEBHOOK_SECRET=.*/RAZORPAY_WEBHOOK_SECRET=${answers.razorpayWebhookSecret}/' .env`)
         }
-            
         
 
         logMessage("Installing PM2")
@@ -213,27 +194,27 @@ async function setup(answers) {
         logMessage("Creating Virtual Host files")
         const vHost = `
 <VirtualHost 127.0.0.1:80 _default_:80>
-  ServerName ${answer.domainName}
+  ServerName ${answers.domainName}
   ServerAlias *
-  DocumentRoot /opt/bitnami/projects/${answer.appName}
-  <Directory "/opt/bitnami/projects/${answer.appName}">
+  DocumentRoot /opt/bitnami/projects/${answers.appName}
+  <Directory "/opt/bitnami/projects/${answers.appName}">
     Options -Indexes +FollowSymLinks -MultiViews
     AllowOverride All
     Require all granted
   </Directory>
-  ProxyPass / http://localhost:${answer.port}/
-  ProxyPassReverse / http://localhost:${answer.port}/
+  ProxyPass / http://localhost:${answers.port}/
+  ProxyPassReverse / http://localhost:${answers.port}/
 </VirtualHost>
 `;
         const vHostSsl = `
 <VirtualHost 127.0.0.1:443 _default_:443>
-    ServerName ${answer.domainName}
+    ServerName ${answers.domainName}
     ServerAlias *
     SSLEngine on
     SSLCertificateFile "/opt/bitnami/apache/conf/bitnami/certs/server.crt"
     SSLCertificateKeyFile "/opt/bitnami/apache/conf/bitnami/certs/server.key"
-    DocumentRoot /opt/bitnami/projects/${answer.appName}
-    <Directory "/opt/bitnami/projects/${answer.appName}">
+    DocumentRoot /opt/bitnami/projects/${answers.appName}
+    <Directory "/opt/bitnami/projects/${answers.appName}">
         Options -Indexes +FollowSymLinks -MultiViews
         AllowOverride All
         Require all granted
@@ -257,10 +238,10 @@ async function setup(answers) {
 
         logMessage("Install SSL Certificate")
         await runCmd("sudo /opt/bitnami/ctlscript.sh stop")
-        if (answer.appName === 'tmbweb') {
-            await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answer.lestEncryptEmail}" --domains="www.${answer.domainName}" --domains="${answer.domainName}" --path="/opt/bitnami/letsencrypt" run`)
-        } else if (answer.appName === 'tmbapi') {
-            await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answer.lestEncryptEmail}" --domains="api.${answer.domainName}" --path="/opt/bitnami/letsencrypt" run`)
+        if (answers.appName === 'tmbweb') {
+            await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answers.lestEncryptEmail}" --domains="www.${answers.domainName}" --domains="${answers.domainName}" --path="/opt/bitnami/letsencrypt" run`)
+        } else if (answers.appName === 'tmbapi') {
+            await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answers.lestEncryptEmail}" --domains="api.${answers.domainName}" --path="/opt/bitnami/letsencrypt" run`)
         }
         
         await runCmd(`sudo /opt/bitnami/ctlscript.sh start`)

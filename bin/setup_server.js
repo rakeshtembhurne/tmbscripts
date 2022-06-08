@@ -65,8 +65,7 @@ inquirer.prompt(questions).then(async (answers) => {
 
             break;
         case "tmbapi":
-            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/trademybots.git"
-            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/api.trademybots.com.git"
+            answers.repo = "https://rakeshtembhurne@github.com/rakeshtembhurne/razorpay-webhooks.git"
             answers.port = 5555
 
             break;
@@ -148,13 +147,14 @@ async function setup(answers) {
         logMessage("Cloning the project")
         await runCmd(`sudo mkdir /opt/bitnami/projects`)
         await runCmd(`sudo chown $USER /opt/bitnami/projects`)
-        process.chdir(`/opt/bitnami/projects/`)
+        logMessage("Changind directory to project")
+        process.chdir(`/opt/bitnami/projects`)
         await runCmd(`git clone ${answers.repo} ${answers.appName}`)
 
         logMessage("Installing dependencies")
         process.chdir(`/opt/bitnami/projects/${answers.appName}`)
         // TODO: should be main branch
-        await runCmd(`git checkout develop`)
+        await runCmd(`git checkout ${answers.branchName}`)
         await runCmd("npm install --silent")
 
         logMessage("Updating environment variables")

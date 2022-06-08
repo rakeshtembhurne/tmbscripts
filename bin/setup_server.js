@@ -233,11 +233,11 @@ async function setup(answers) {
     ProxyPassReverse / http://localhost:8080/
 </VirtualHost>
 `;
-        fs.writeFileSync('/opt/bitnami/apache/conf/vhosts/tmbweb-vhost.conf', vHost)
-        fs.writeFileSync('/opt/bitnami/apache/conf/vhosts/tmbweb-https-vhost.conf', vHostSsl)
+        // fs.writeFileSync('/opt/bitnami/apache/conf/vhosts/tmbweb-vhost.conf', vHost)
+        // fs.writeFileSync('/opt/bitnami/apache/conf/vhosts/tmbweb-https-vhost.conf', vHostSsl)
 
-        logMessage("Restarting Apache")
-        await runCmd("sudo /opt/bitnami/ctlscript.sh restart apache")
+        // logMessage("Restarting Apache")
+        // await runCmd("sudo /opt/bitnami/ctlscript.sh restart apache")
 
         logMessage("Installing Lego")
         process.chdir(`/tmp`)

@@ -113,6 +113,7 @@ async function runCmd(command) {
     try {
         const { stdout, stderr } = await exec(command)
         console.log("\x1b[33m", "Executing : " + command, "\x1b[0m")
+        console.log({stdout, stderr});
     } catch (error) {
         console.log("\x1b[31m", error.message, "\x1b[0m")
     }

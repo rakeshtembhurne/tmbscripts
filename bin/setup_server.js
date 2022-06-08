@@ -166,6 +166,7 @@ async function setup(answers) {
         await runCmd("npm install --silent")
 
         logMessage("Updating environment variables")
+        await runCmd("pwd")
         await fs.copyFileSync("./.env.example", ".env")
 
         if (answers.appName === 'tmbweb') {

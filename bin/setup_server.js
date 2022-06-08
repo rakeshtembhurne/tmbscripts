@@ -163,7 +163,7 @@ async function setup(answers) {
         logMessage("Installing dependencies")
         process.chdir(`/opt/bitnami/projects/${answers.appName}`)
         // TODO: should be main branch
-        await runCmd(`git checkout origin ${answers.branchName}`)
+        await runCmd(`git checkout ${answers.branchName}`)
         await runCmd("npm install --silent")
 
         logMessage("Updating environment variables")

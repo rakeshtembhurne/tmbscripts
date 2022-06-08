@@ -247,8 +247,7 @@ async function setup(answers) {
         await runCmd(`sudo mv lego /opt/bitnami/letsencrypt/lego`)
 
         logMessage("Preparing to install SSL certificate")
-        await runCmd("sudo /opt/bitnami/ctlscript.sh status")
-        await runCmd("sudo /opt/bitnami/ctlscript.sh stop")
+        await runCmd("sudo /opt/bitnami/ctlscript.sh stop apache")
 
         logMessage("Installing SSL Certificate with lego")
         if (answers.appName === 'tmbweb') {
@@ -258,7 +257,7 @@ async function setup(answers) {
         }
         
         logMessage("Restarting all services")
-        await runCmd(`sudo /opt/bitnami/ctlscript.sh start`)
+        await runCmd(`sudo /opt/bitnami/ctlscript.sh start apache`)
 
         logMessage("Moving SSL Certificates for Apache")
         await runCmd("sudo mv /opt/bitnami/apache2/conf/bitnami/certs/server.crt /opt/bitnami/apache2/conf/bitnami/certs/server.crt.old")

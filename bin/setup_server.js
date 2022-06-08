@@ -73,7 +73,7 @@ inquirer.prompt(questions).then(async (answers) => {
 
     answers.branchName = 'develop';
     if (answers.nodeEnv === 'production') {
-        answers.branchName = 'develop';
+        answers.branchName = 'master';
     }
 
     // answers.appPath = path.join(ownPath, answers.appName)

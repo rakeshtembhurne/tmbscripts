@@ -245,6 +245,7 @@ async function setup(answers) {
         await runCmd(`sudo mv lego /opt/bitnami/letsencrypt/lego`)
 
         logMessage("Preparing to install SSL certificate")
+        await runCmd("sudo /opt/bitnami/ctlscript.sh status")
         await runCmd("sudo /opt/bitnami/ctlscript.sh stop")
 
         logMessage("Installing SSL Certificate with lego")

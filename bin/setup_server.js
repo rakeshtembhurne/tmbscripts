@@ -53,6 +53,14 @@ const questions = [
             return answers.appName === 'tmbapi'
         }
     },
+    {
+        type: "input",
+        name: "lestEncryptEmail",
+        message: "Please provide your Lets Encrypt Email for SSL Certificate",
+        default() {
+            return "tj2point0@gmail.com"
+        }
+    },
     
 ]
 
@@ -154,7 +162,7 @@ async function setup(answers) {
         logMessage("Installing dependencies")
         process.chdir(`/opt/bitnami/projects/${answers.appName}`)
         // TODO: should be main branch
-        await runCmd(`git checkout ${answers.branchName}`)
+        await runCmd(`git checkout origin ${answers.branchName}`)
         await runCmd("npm install --silent")
 
         logMessage("Updating environment variables")
@@ -236,14 +244,17 @@ async function setup(answers) {
         await runCmd(`sudo mkdir -p /opt/bitnami/letsencrypt`)
         await runCmd(`sudo mv lego /opt/bitnami/letsencrypt/lego`)
 
-        logMessage("Install SSL Certificate")
+        logMessage("Preparing to install SSL certificate")
         await runCmd("sudo /opt/bitnami/ctlscript.sh stop")
+
+        logMessage("Installing SSL Certificate with lego")
         if (answers.appName === 'tmbweb') {
             await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answers.lestEncryptEmail}" --domains="www.${answers.domainName}" --domains="${answers.domainName}" --path="/opt/bitnami/letsencrypt" run`)
         } else if (answers.appName === 'tmbapi') {
             await runCmd(`sudo /opt/bitnami/letsencrypt/lego --tls --email="${answers.lestEncryptEmail}" --domains="api.${answers.domainName}" --path="/opt/bitnami/letsencrypt" run`)
         }
         
+        logMessage("Restarting all services")
         await runCmd(`sudo /opt/bitnami/ctlscript.sh start`)
 
         logMessage("Moving SSL Certificates for Apache")
